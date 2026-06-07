@@ -276,6 +276,12 @@ app.post("/send-group", async (req, res) => {
   }
 });
 
+app.get("/groups", async (req, res) => {
+  const chats = await client.getChats();
+  const groups = chats.filter(c => c.isGroup).map(c => c.name);
+  res.json({ groups });
+});
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`🌐 HTTP server listening on port ${PORT}`);
