@@ -49,70 +49,39 @@ export default async function handler(req, res) {
     console.error('Claude error:', JSON.stringify(claudeData));
     return res.status(500).json({ ok: false, error: 'Claude API failed', details: claudeData });
   }
-  const rawMessage = claudeData.content[0].text;
-  // Clean message for WhatsApp template: remove markdown, limit length
-  const message = rawMessage
-    .replace(/\*\*/g, '')
-    .replace(/^(FLO|PATRICK|DOMINIK):\s*/gm, '')
-    .replace(/\n\n+/g, ' ')
-    .replace(/\n/g, ' ')
-    .trim()
-    .slice(0, 1000);
+  const message = claudeData.content[0].text;
 
-  // 3. An alle drei einzeln senden
-  const phoneNumberId = process.env.META_PHONE_NUMBER_ID;
-  const accessToken = process.env.META_ACCESS_TOKEN;
-  const recipients = [
-    { uid: 'flo',     phone: process.env.WHATSAPP_FLO },
-    { uid: 'patrick', phone: process.env.WHATSAPP_PATRICK },
-    { uid: 'dominik', phone: process.env.WHATSAPP_DOMINIK }
-  ].filter(r => r.phone);
+  // 3. Nachricht via Railway WhatsApp Bot senden
+  const botRes = await fetch('https://pushup-challenge-production-3609.up.railway.app/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'push365'
+    },
+    body: JSON.stringify({
+      group: 'Bikepacking 25',
+      message: message
+    })
+  });
 
-  const results = [];
-  for (const recipient of recipients) {
-    const metaRes = await fetch(
-      `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to: recipient.phone,
-          type: 'template',
-          template: {
-            name: 'daily_motivation',
-            language: { code: 'de' },
-            components: [{
-              type: 'body',
-              parameters: [{ type: 'text', text: message }]
-            }]
-          }
-        })
-      }
-    );
-    const metaData = await metaRes.json();
-    if (metaData.error) {
-      console.error('Meta error for', recipient.uid, ':', metaData.error);
-      results.push({ uid: recipient.uid, ok: false, error: metaData.error.message });
-    } else {
-      results.push({ uid: recipient.uid, ok: true, id: metaData.messages?.[0]?.id });
-    }
+  const botData = await botRes.json();
+
+  if (!botData.ok && !botData.success) {
+    console.error('Bot error:', JSON.stringify(botData));
+    return res.status(500).json({ ok: false, error: 'Bot failed', details: botData });
   }
 
-  return res.status(200).json({ ok: true, message, results });
+  return res.status(200).json({ ok: true, message });
 }
 
 function buildSystemPrompt(time) {
-  return `Du bist Military Drill-Sergeant, der jetzt drei Männer durch eine 365-Tage Liegestütz-Challenge coacht. Du schreibst WhatsApp-Nachrichten an die drei einzeln.
+  return `Du bist Military Drill-Sergeant, der jetzt drei Männer durch eine 365-Tage Liegestütz-Challenge coacht. Du schreibst WhatsApp-Nachrichten in die Gruppe der drei.
 
 DEIN STIL:
 - Humor-Mix aus Jimmy Carr (dunkel, sarkastisch, präzise Tiefschläge) und Jimmy Fallon (warm, selbstironisch, manchmal albern)
 - Immer direkt mit Namen ansprechen
 - Militärische Sprache gemischt mit modernem Slang
-- Nie länger als 3-4 Sätze
+- Nie länger als 5-6 Sätze
 - Keine Emojis außer maximal 1 pro Nachricht
 - Unterschreibe immer mit " — DEIN SCHLECHTES GEWISSEN"
 
