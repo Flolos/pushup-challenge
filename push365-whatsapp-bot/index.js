@@ -250,6 +250,29 @@ app.post("/broadcast", async (req, res) => {
   res.json({ results });
 });
 
+// Nachricht an Gruppe senden via Name
+app.post("/send-group", async (req, res) => {
+  const apiKey = req.headers["x-api-key"];
+  if (apiKey !== process.env.API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const { group, message } = req.body;
+  if (!group || !message) {
+    return res.status(400).json({ error: "Missing 'group' or 'message'" });
+  }
+  try {
+    const chats = await client.getChats();
+    const groupChat = chats.find(c => c.isGroup && c.name === group);
+    if (!groupChat) {
+      return res.status(404).json({ error: "Group not found: " + group });
+    }
+    await groupChat.sendMessage(message);
+    res.json({ success: true, group: groupChat.name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`🌐 HTTP server listening on port ${PORT}`);
