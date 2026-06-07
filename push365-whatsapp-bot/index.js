@@ -256,6 +256,9 @@ app.post("/send-group", async (req, res) => {
   if (apiKey !== process.env.API_KEY) {
     return res.status(401).json({ error: "Unauthorized" });
   }
+    if (!client.info) {
+    return res.status(503).json({ error: "Bot not ready yet" });
+  }
   const { group, message } = req.body;
   if (!group || !message) {
     return res.status(400).json({ error: "Missing 'group' or 'message'" });
