@@ -52,7 +52,7 @@ export default async function handler(req, res) {
   const message = claudeData.content[0].text;
 
   // 3. Nachricht via Railway WhatsApp Bot senden
-  const botRes = await fetch('https://pushup-challenge-production-3609.up.railway.app/send', {
+  const botRes = await fetch('https://pushup-challenge-production-3609.up.railway.app/send-group', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
