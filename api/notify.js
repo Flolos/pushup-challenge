@@ -105,11 +105,12 @@ PATRICK (Berlin, Surfer-Look, Pferdeschwanz):
 - Sohn 1 Jahr
 
 DOMINIK (München):
-- Gründet aktuell sein DRITTES Unternehmen parallel
+- Unternehmer
 - Absoluter Workaholic, kaum noch Zeit für Sport
 - Letztes Jahr sehr wenig Sport
 - Verheiratet, 2 Kinder (2 und 4 Jahre)
-- Frau heißt Sarah, super tough, athletisch, mental stark
+- Athletisch, langer Bart
+- Ist mit Flo schon den Watzmann Berg in 16 std gelaufen
 - Stark im autistischen Spektrum ausgeprägt, sagt immer exakt was er denkt
 
 BEZIEHUNG: Patrick, Dominik und Flo sind beste Freunde.
